@@ -20,6 +20,7 @@
 
 \usepackage{colortbl}
 \usepackage{xcolor}
+\usepackage{setspace}
 %\usepackage{gensymb} % for \degree
 \graphicspath{{images/}}
 
@@ -235,7 +236,16 @@
     
 }
 
-\headerbox{\bf\color{\headercolor} Method}{name=abstract,column=0,below=contribution,span=2}{
+\headerbox{\bf\color{\headercolor} The Proposed Coarse-to-fine Network}{name=abstract,column=0,below=contribution,span=2}{
+
+    \textbf{\color{\subheadercolor}Input Preprocessing}
+
+    \begin{itemize}
+        \item {\scriptsize We replace the CRF of the input images with a fixed gamma curve as $\ldr_i = (\crf^{-1} (\originldr_i))^{1/\gamma}$, where $\gamma=2.2$} \vspace{-0.2em}
+        \item {\scriptsize Global alignment is then performed using a similarity transformation to compensate camera motions among neighboring frames}
+    \end{itemize}
+
+    \vspace{0.2em}
     \textbf{\color{\subheadercolor}Network Architecture for Two Alternating Exposures:} 
     \vspace{-0.5em}
     \begin{center}
@@ -243,36 +253,28 @@
     \end{center}
 
     \vspace{-0.7em}
-    \begin{minipage}[t]{0.42\linewidth}
-        \textbf{\color{\subheadercolor}Input Preprocessing}
+    \textbf{\color{\subheadercolor}CoarseNet Performs Alignment and Fusion in Image Space:}
 
-        {\scriptsize We replace the CRF of the input images with a fixed gamma curve as $\ldr_i = (\crf^{-1} (\originldr_i))^{1/\gamma}$, where $\gamma=2.2$. Global alignment is then performed using a similarity transformation to compensate camera motions among neighboring frames.}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.54\linewidth}
-        \textbf{\color{\subheadercolor}Extension to Handle Three Exposures}
-        \vspace{-0.4em}
-        \begin{center}
-            \includegraphics[width=\textwidth]{images/three_exposure_network-crop.pdf}
-        \end{center}
-    \end{minipage}
-
+    \begin{itemize}
+        \item {\scriptsize CoarseNet warps neighboring frames to the center frame using optical flows, and reconstructs the HDR image by pixel blending}
+    \end{itemize}
+    
     \vspace{0.2em}
     \begin{minipage}[c]{0.48\linewidth}
-        \textbf{\color{\subheadercolor}CoarseNet:}
         \begin{center}
             \includegraphics[width=\textwidth]{images/coarsenet-crop.pdf}
         \end{center}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.48\linewidth}
-        \textbf{\color{\subheadercolor}Coarse HDR Reconstruction:}
+        \vspace{0.2em}
+        \textbf{\footnotesize Coarse HDR Reconstruction:}
         \begin{equation}
             \tiny
             \label{eq:weighted_sum}
             \coarsehdr_i = \frac{\weight_1 \lhdr_{i-1} + \weight_2 \warplhdr_{i-1,i} + \weight_3 \lhdr_i + \weight_4 \warplhdr_{i+1,i} + \weight_5 \lhdr_{i+1}}{\sum_{k=1}^5 \weight_k}.
         \end{equation}
-        \textbf{\color{\subheadercolor}Loss Function ($L_1$ loss):}
+        \textbf{\footnotesize Loss Function ($L_1$ loss):}
         \begin{equation}
             \label{eq:mutonemap}
             \tiny
@@ -280,16 +282,24 @@
         \end{equation}
     \end{minipage}
 
+    \vspace{0.5em}
+    \textbf{\color{\subheadercolor}RefineNet Performs Alignment and Fusion in Feature Space:}
+
+    %\vspace{0.2em}
+    \begin{itemize}
+        \item {\scriptsize Features of neighboring frames are aligned to the center frame using deformable alignment module} \vspace{-0.2em}
+        \item {\scriptsize The aligned feature is fused with a temporal attention for HDR reconstruction}
+    \end{itemize}
+
+    \vspace{0.5em}
     \begin{minipage}[c]{0.48\linewidth}
-        \textbf{\color{\subheadercolor}RefineNet:}
-        \vspace{-0.5em}
         \begin{center}
             \includegraphics[width=0.9\textwidth]{images/deformable_fusion_module-crop.pdf}
         \end{center}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.48\linewidth}
-        \textbf{\color{\subheadercolor}Refined HDR Reconstruction:}
+        \textbf{\footnotesize Refined HDR Reconstruction:}
 
         \begin{minipage}[c]{0.48\linewidth}
             \begin{equation}
@@ -307,7 +317,7 @@
         \end{minipage}
 
         \vspace{1.0em} 
-        \textbf{\color{\subheadercolor}Loss function ($L_1$ and perceptual loss):}
+        \textbf{\footnotesize Loss function ($L_1$ and perceptual loss):}
         \begin{equation}
             \tiny
             \refineloss = \, \frac{\parallel \finaltmhdr_i - \gttmhdr_i \parallel_1}{\parallel 1 - \validmask_i \parallel_1} + \sum\nolimits_k \parallel \phi_k(\tmhdr_i) - \phi_k(\gttmhdr_i) \parallel_1
@@ -317,7 +327,7 @@
 
 }
 %
-\headerbox{\bf\color{\headercolor} Real-world Dataset}{name=dataset,column=2,row=0,span=3}{
+\headerbox{\bf\color{\headercolor} The Introduced Real-world Video Dataset}{name=dataset,column=2,row=0,span=3}{
     \begin{minipage}[t]{0.44\linewidth}
         \textbf{\color{\subheadercolor}Dataset Statistics}
         \vspace{-0.5em}
@@ -325,25 +335,35 @@
             \includegraphics[width=0.9\textwidth]{images/real_data_stats-crop.pdf}
         \end{center}
         \vspace{-1em}
-        \textbf{\color{\subheadercolor}Generating the LDRs-HDR Pairs for Dynamic Scenes.}
-        \vspace{-0.7em}
-        \begin{center}
-            \includegraphics[width=0.87\textwidth]{images/dynamic_gt_preparation-crop.pdf}
-        \end{center}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.54\linewidth}
         \textbf{\color{\subheadercolor}Samples in Static Scenes With GT}
         \vspace{-0.6em}
         \begin{center}
-            \includegraphics[width=0.88\textwidth]{images/static_samples-crop.pdf}
+            \includegraphics[width=0.78\textwidth]{images/static_samples-crop.pdf}
         \end{center}
         \vspace{-1em}
         \textbf{\color{\subheadercolor}Samples in Dynamic Scenes Without GT}
         \vspace{-0.7em}
         \begin{center}
-            \includegraphics[width=0.88\textwidth]{images/dynamic_nogt_samples-crop.pdf}
+            \includegraphics[width=0.78\textwidth]{images/dynamic_nogt_samples-crop.pdf}
         \end{center}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.54\linewidth}
+        \textbf{\color{\subheadercolor}Generating the LDRs-HDR Pairs for Dynamic Scenes with GT}
+
+        {\scriptsize Row 1: the selected image sequence.\\[-0.5em]
+            Rows 2 and 3: two sample pairs with low-exposure and high-exposure reference frames, respectively.}
+        \vspace{-0.7em}
+        \begin{center}
+            \includegraphics[width=0.77\textwidth]{images/dynamic_gt_preparation-crop.pdf}
+        \end{center}
+        \vspace{-0.7em}
+        \begin{enumerate}
+            \scriptsize
+            \item The subject is asked to keep still for 2s, an HDR image is generated for this static frame
+            \item The subject is asked to move back-and-forth (e.g., waving hands or walking)
+            \item Select a sequence whose center frame was the static frame, and arrange it to be proper pairs 
+        \end{enumerate}
     \end{minipage}
 
 }
@@ -374,7 +394,7 @@
 
     \vspace{0.2em}
     \begin{minipage}[c]{0.65\linewidth}
-        \textbf{\color{\subheadercolor}Quantitative Results on the Introduced Real Dataset}
+        \textbf{\color{\subheadercolor}Quantitative Results on the Introduced Real-world Dataset}
         \vspace{-0.8em}
         \begin{center}
             \includegraphics[width=\textwidth]{images/res_quant_real-crop.pdf}
